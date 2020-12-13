@@ -63,6 +63,7 @@ trigger:
     exclude:
     - master
     - "2-*-stable"
+    - fix/sdk-ci
 
 ---
 kind: pipeline
@@ -72,13 +73,13 @@ concurrency:
   limit: 2
 
 steps:
-  - name: "Test"
-    image: node:12.13.1
-    commands:
-      - npm -g install yarn
-      - yarn install
-      - yarn lint
-      - yarn test:ci --collectCoverage=true
+  # - name: "Test"
+  #   image: node:12.13.1
+  #   commands:
+  #     - npm -g install yarn
+  #     - yarn install
+  #     - yarn lint
+  #     - yarn test:ci --collectCoverage=true
 
   - name: "Bump & Tag"
     image: quay.io/openware/sdk-citools:2.6.4
@@ -91,41 +92,41 @@ steps:
       - BUNDLE_GEMFILE=/sdk/Gemfile bundle exec rake --rakefile=/sdk/Rakefile ci:prebuild
 
 
-  - name: "Build Docker image"
-    image: plugins/docker
-    settings:
-      environment:
-      REACT_APP_SENTRY_KEY:
-        from_secret: master_sentry_key
-      REACT_APP_SENTRY_ORGANIZATION:
-        from_secret: master_sentry_organization
-      REACT_APP_SENTRY_PROJECT:
-        from_secret: master_sentry_project
-      username:
-        from_secret: quay_username
-      password:
-        from_secret: quay_password
-      repo:
-        from_secret: quay_repo
-      registry: quay.io
+  # - name: "Build Docker image"
+  #   image: plugins/docker
+  #   settings:
+  #     environment:
+  #     REACT_APP_SENTRY_KEY:
+  #       from_secret: master_sentry_key
+  #     REACT_APP_SENTRY_ORGANIZATION:
+  #       from_secret: master_sentry_organization
+  #     REACT_APP_SENTRY_PROJECT:
+  #       from_secret: master_sentry_project
+  #     username:
+  #       from_secret: quay_username
+  #     password:
+  #       from_secret: quay_password
+  #     repo:
+  #       from_secret: quay_repo
+  #     registry: quay.io
 
-  - name: "Redeploy on master.devkube.com"
-    image: rubykube/microkube:0.2.0
-    environment:
-      WEBHOOK_JWT_SECRET:
-        from_secret: devkube_webhook_secret
-      DOCKER_REPO:
-        from_secret: quay_repo
-    commands:
-      - export latest_image=$DOCKER_REPO:$(cat .tags)
-      - cd /home/app
-      - bundle exec rake payload:send[frontend,$latest_image,http://$DRONE_BRANCH.devkube.com:1337]
-    when:
-      branch:
-        - master
+  # - name: "Redeploy on master.devkube.com"
+  #   image: rubykube/microkube:0.2.0
+  #   environment:
+  #     WEBHOOK_JWT_SECRET:
+  #       from_secret: devkube_webhook_secret
+  #     DOCKER_REPO:
+  #       from_secret: quay_repo
+  #   commands:
+  #     - export latest_image=$DOCKER_REPO:$(cat .tags)
+  #     - cd /home/app
+  #     - bundle exec rake payload:send[frontend,$latest_image,http://$DRONE_BRANCH.devkube.com:1337]
+  #   when:
+  #     branch:
+  #       - master
 
   - name: "Push and Notify"
-    image: quay.io/openware/sdk-citools:2.6.4
+    image: quay.io/openware/sdk-citools:test20
     environment:
       BOT_USERNAME: kite-bot
       BOT_NAME: Kite Bot
@@ -144,16 +145,14 @@ steps:
       GITHUB_API_KEY:
         from_secret: kite_bot_key
     commands:
-      - BUNDLE_GEMFILE=/sdk/Gemfile bundle exec rake --rakefile=/sdk/Rakefile ci:postbuild[/drone/src]
+      - BUNDLE_GEMFILE=/sdk/Gemfile bundle exec rake --rakefile=/sdk/Rakefile ci:postbuild[/drone/src] --trace
     when:
       branch:
-        - master
-        - "2-*-stable"
+        - fix/sdk-ci
 
 trigger:
   branch:
-  - master
-  - "2-*-stable"
+  - fix/sdk-ci
   event:
   - push
 
