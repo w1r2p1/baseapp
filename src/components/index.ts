@@ -43,3 +43,4 @@ export * from './UploadFile';
 export * from './WalletItem';
 export * from './WalletList';
 export * from './MetaMaskButton';
+export * from './InternalTransfer';

@@ -22,6 +22,7 @@ import { customizationUpdateReducer } from './user/customization';
 import { documentationReducer } from './user/documentation';
 import { sendEmailVerificationReducer } from './user/emailVerification';
 import { historyReducer  } from './user/history';
+import { internalTransfersReducer } from './user/internalTransfers';
 import {
     addressesReducer,
     documentsReducer,
@@ -80,4 +81,5 @@ export const userReducer = combineReducers({
     userActivity: userActivityReducer,
     wallets: walletsReducer,
     withdrawLimit: withdrawLimitReducer,
+    internalTransfers: internalTransfersReducer,
 });
