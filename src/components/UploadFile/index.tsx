@@ -70,6 +70,7 @@ const UploadFileComponent: React.FC<Props> = ({
                 {label ? <label>{label}</label> : null}
                 <div className="pg-upload-file__content__form">
                     <input
+                        accept="application/pdf,image/jpeg,image/png"
                         className="pg-upload-file__content__form__input"
                         data-multiple-caption="files selected"
                         draggable={true}
