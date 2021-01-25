@@ -11,6 +11,7 @@ import { TrashBin } from '../../assets/images/TrashBin';
 import {
     beneficiariesCreateData,
     beneficiariesDelete,
+    beneficiariesFetch,
     Beneficiary,
     BeneficiaryBank,
     MemberLevels,
@@ -20,6 +21,7 @@ import {
     selectBeneficiariesActivateSuccess,
     selectBeneficiariesCreate,
     selectBeneficiariesCreateSuccess,
+    selectBeneficiariesDeleteSuccess,
     selectMemberLevels,
     selectMobileDeviceState,
     selectUserInfo,
@@ -39,6 +41,7 @@ interface ReduxProps {
     beneficiariesActivateError?: CommonError;
     memberLevels?: MemberLevels;
     beneficiariesActivateSuccess: boolean;
+    beneficiariesDeleteSuccess: boolean;
     userData: User;
     isMobileDevice: boolean;
 }
@@ -47,6 +50,7 @@ interface DispatchProps {
     deleteAddress: typeof beneficiariesDelete;
     memberLevelsFetch: typeof memberLevelsFetch;
     beneficiariesCreateData: typeof beneficiariesCreateData;
+    beneficiariesFetch: typeof beneficiariesFetch;
     sendError: typeof sendError;
 }
 
@@ -108,6 +112,7 @@ class BeneficiariesComponent extends React.Component<Props, State> {
             beneficiaries,
             beneficiariesAddSuccess,
             beneficiariesActivateSuccess,
+            beneficiariesDeleteSuccess,
         } = this.props;
 
         if ((nextProps.currency && nextProps.currency !== currency) ||
@@ -122,6 +127,10 @@ class BeneficiariesComponent extends React.Component<Props, State> {
 
         if (nextProps.beneficiariesActivateSuccess && !beneficiariesActivateSuccess) {
             this.handleToggleConfirmationModal();
+        }
+
+        if (nextProps.beneficiariesDeleteSuccess && !beneficiariesDeleteSuccess) {
+            this.props.beneficiariesFetch();
         }
     }
 
@@ -462,10 +471,12 @@ const mapStateToProps = (state: RootState): ReduxProps => ({
     userData: selectUserInfo(state),
     isMobileDevice: selectMobileDeviceState(state),
     beneficiariesActivateSuccess: selectBeneficiariesActivateSuccess(state),
+    beneficiariesDeleteSuccess: selectBeneficiariesDeleteSuccess(state),
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = dispatch => ({
     deleteAddress: payload => dispatch(beneficiariesDelete(payload)),
+    beneficiariesFetch: () => dispatch(beneficiariesFetch()),
     memberLevelsFetch: () => dispatch(memberLevelsFetch()),
     beneficiariesCreateData: payload => dispatch(beneficiariesCreateData(payload)),
     sendError: payload => dispatch(sendError(payload)),
